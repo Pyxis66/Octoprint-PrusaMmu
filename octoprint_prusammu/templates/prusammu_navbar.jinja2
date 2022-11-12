@@ -1,0 +1,20 @@
+<a href="javascript:void(0)" data-bind="click: openSettings, visible: shouldShowNav">
+  MMU:
+  <i class="fas fa-long-arrow-alt-up" data-bind="
+    style: { color: navPreviousToolColor },
+    hidden: navPreviousToolText() == '',
+    attr: { title: navPreviousToolText }
+  "></i>
+  <i class="fas" data-bind="
+    style: { color: navToolColor },
+    class: navToolIcon,
+    hidden: navToolIcon() == '',
+    attr: { title: navToolText }
+  "></i>
+  <i class="fas" data-bind=",
+    class: navActionIcon,
+    hidden: navActionIcon() == '',
+    attr: { title: navActionText }
+  "></i>
+  <span data-bind="text: navActionText, hidden: isSimpleDisplayMode"></span>
+</a>

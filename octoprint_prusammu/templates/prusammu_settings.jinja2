@@ -1,0 +1,156 @@
+<h2>{{ _("Prusa MMU") }}</h2>
+<form class="form-horizontal">
+  <h3>{{ _("Filament") }}</h3>
+
+  <div class="control-group">
+    <label class="control-label">{{ _("Filament label source") }}</label>
+    <div class="controls">
+      <select data-bind="
+        enable: settings.plugins.prusammu.filamentSources().length > 1,
+        options: settings.plugins.prusammu.filamentSources,
+        optionsText: 'name',
+        optionsValue: 'id',
+        value: settings.plugins.prusammu.filamentSource,
+      "></select>
+      <span class="help-block">
+        Supports
+        <a href="https://plugins.octoprint.org/plugins/SpoolManager/" target="_blank">Spool Manager</a>
+        and
+        <a href="https://plugins.octoprint.org/plugins/filamentmanager/" target="_blank">Filament Manager</a>
+        when installed.
+      </span>
+
+      <div class="alert alert-block" data-bind="visible: settings.plugins.prusammu.filamentSource() == 'spoolManager'">
+        <p><strong>Spool Manager:</strong><br /> {{ _("To manage filament use the Spool tab and select the correct tool each filament spool is connected to.") }}</p>
+        <p style="color:red">{{ _("IMPORTANT: You must disable 'Reminder for verifying the selected spool.' under Notification in the Spool Manager settings or the select filament feature will not work.") }}</p>
+      </div>
+
+      <div class="alert alert-block" data-bind="visible: settings.plugins.prusammu.filamentSource() == 'filamentManager'">
+        <p><strong>Filament Manager:</strong><br /> {{ _("To manage filament use the Filament Manager section in the left sidebar.") }}</p>
+        <p>{{ _("Note: FilamentManager does not support color so no color will be shown.") }}</p>
+      </div>
+
+      <div class="alert alert-block" data-bind="visible: settings.plugins.prusammu.filamentSource() == 'gcode'">
+        <p><strong>GCode:</strong><br /> {{ _("Filament names and colors will be extracted from the print file when available.") }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div data-bind="visible: settings.plugins.prusammu.filamentSource() == 'prusammu'">
+    <div data-bind="foreach: settings.plugins.prusammu.filament">
+      <div class="control-group">
+        <label class="control-label"><strong data-bind="text: $index() + ($parent.settings.plugins.prusammu.indexAtZero() ? 0 : 1)"></strong></label>
+        <div class="controls">
+          <input type="checkbox" data-bind="checked: $data.enabled" />
+          <input type="text" data-bind="value: $data.name" />
+          <i class="fas fa-pen-fancy icon-large" data-bind="style: { color: $data.color }, visible: $parent.settings.plugins.prusammu.classicColorPicker()"></i>
+          <input type="color" class="input-mini" data-bind="value: $data.color, visible: $parent.settings.plugins.prusammu.classicColorPicker()" />
+          <div class="btn-group" data-bind="hidden: $parent.settings.plugins.prusammu.classicColorPicker()">
+            <button type="button" class="btn color-dropdown dropdown-toggle" data-bind="attr: {'data-index': $index}">
+              <div class="colorPickButton colorPickButtonAlignments" data-bind="style: { color: $data.color, background: $data.color }"></div>
+              <span class="caret"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>{{ _("Timeout") }}</h3>
+
+  <div class="control-group">
+    <label class="control-label">{{ _("Timeout") }}</label>
+    <div class="controls">
+      <div class="input-append">
+        <input type="number" min="1" pattern="[0-9]+" class="input-mini text-right" class="input-block-level" data-bind="value: settings.plugins.prusammu.timeout">
+        <span class="add-on">{{ _("seconds") }}</span>
+      </div>
+      <span class="help-block">{{ _("After this given time, the dialog closes and the print will go on as usual. This means you have to select the filament at your printer.") }}</span>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label">{{ _("Default filament") }}</label>
+    <div class="controls">
+      <input type="checkbox" data-bind="checked: settings.plugins.prusammu.useDefaultFilament" />
+      <select data-bind="
+        enable: settings.plugins.prusammu.useDefaultFilament,
+        options: settings.plugins.prusammu.filament,
+        optionsText: function(fill) {
+          if(settings.plugins.prusammu.filamentSource() == 'prusammu') {
+           return 'Filament ' + (settings.plugins.prusammu.indexAtZero() ? fill.id() - 1 : fill.id()) + ': ' + fill.name()
+          }
+          return 'Filament ' + (settings.plugins.prusammu.indexAtZero() ? fill.id() - 1 : fill.id())
+        },
+        optionsValue: function(fill) {
+          return fill.id() - 1
+        },
+        value: settings.plugins.prusammu.defaultFilament,
+        optionsCaption: 'Choose...'
+      "></select>
+      <span class="help-block">{{ _("Check if you want octoprint to default to a specific filament when the dialog times out.") }}</span>
+    </div>
+  </div>
+
+  <h3>{{ _("Navbar") }}</h3>
+
+  <div class="control-group">
+    <div class="controls">
+      <label class="checkbox">
+        <input type="checkbox" data-bind="checked: settings.plugins.prusammu.displayActiveFilament" />
+        {{ _("Display in navbar") }}
+      </label>
+      <span class="help-block">{{ _("Check if you want to see the active filament as well as MMU state change in the navbar.") }}</span>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <div class="controls">
+      <label class="checkbox">
+        <input type="checkbox" data-bind="checked: settings.plugins.prusammu.simpleDisplayMode" />
+        {{ _("Simple display mode") }}
+      </label>
+      <span class="help-block">{{ _("Check to remove the text from the navbar item to save space.") }}</span>
+    </div>
+  </div>
+
+  <h3>{{ _("Advanced") }}</h3>
+
+  <div class="control-group">
+    <div class="controls">
+      <label class="checkbox">
+        <input type="checkbox" data-bind="checked: settings.plugins.prusammu.indexAtZero" />
+        {{ _("Index at zero") }}
+      </label>
+      <span class="help-block">{{ _("Check to have the filament numbers be 0-4 instead of 1-5. Plugins like Spool Manager as well as the actual gcode refrence them as 0-4.") }}</span>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <div class="controls">
+      <label class="checkbox">
+        <input type="checkbox" data-bind="checked: settings.plugins.prusammu.classicColorPicker" />
+        {{ _("Classic color picker") }}
+      </label>
+      <span class="help-block">{{ _("Check to revert back to the classic color picker instead of the new one.") }}</span>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <div class="controls">
+      <label class="checkbox">
+        <input type="checkbox" data-bind="checked: settings.plugins.prusammu.debug" />
+        {{ _("Debug") }}
+      </label>
+      <span class="help-block">{{ _("Warning: Enabling debug will make Prusa MMU noisy in logs and devtools. May also slow down your print.") }}</span>
+    </div>
+  </div>
+
+  <h3>MMU2 Help</h3>
+
+  <ul>
+    <li><a href="https://help.prusa3d.com/guide/service-menu-individual-filament-calibration_86376" target="_blank">{{ _("MMU2 Filament Calibration")}}</a></li>
+    <li><a href="https://help.prusa3d.com/guide/filament-jam-mmu2s_85936" target="_blank">{{ _("MMU2 Filament Jam")}}</a></li>
+    <li><a href="https://help.prusa3d.com/article/mmu2s-leds-meaning_2187#red-light" target="_blank">{{ _("MMU2 Red Light Troubleshooting") }}</a></li>
+  </ul>
+</form>
